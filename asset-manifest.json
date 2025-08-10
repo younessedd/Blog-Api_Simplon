@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/blog-api-simplon/static/css/main.2cf19e45.css",
+    "main.js": "/blog-api-simplon/static/js/main.1fd0a197.js",
+    "index.html": "/blog-api-simplon/index.html",
+    "main.2cf19e45.css.map": "/blog-api-simplon/static/css/main.2cf19e45.css.map",
+    "main.1fd0a197.js.map": "/blog-api-simplon/static/js/main.1fd0a197.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.2cf19e45.css",
+    "static/js/main.1fd0a197.js"
+  ]
+}
