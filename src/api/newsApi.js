@@ -2,9 +2,14 @@ export const getCategories = async () => {
   try {
     const res = await fetch("https://dummyjson.com/posts/tags");
     const data = await res.json();
-    return ["all", ...data.map(t => t.slug).slice(0, 15)]; // Limit to a clean 15 string tags
+    const tags = data.map(t => t.slug).slice(0, 15);
+    // Ensure technology is always available
+    if (!tags.includes('technology')) {
+      tags.unshift('technology');
+    }
+    return ["all", ...tags];
   } catch (error) {
-    return ["all", "history", "magical", "fiction"];
+    return ["all", "technology", "history", "magical", "fiction"];
   }
 };
 

@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useBlogs } from '../context/BlogContext';
-import { PenTool, LogOut, Code } from 'lucide-react';
+import { PenTool, LogOut, Code, ArrowUp } from 'lucide-react';
 
 const Header = () => {
   const { adminLoggedIn, logout } = useBlogs();
@@ -12,7 +12,7 @@ const Header = () => {
       <div className="container nav-content">
         <Link to="/" className="logo">
           <Code className="logo-icon" />
-          <span>DevNews</span>
+          <span>DevBlog</span>
         </Link>
         <nav className="nav-links">
           {adminLoggedIn ? (
@@ -39,6 +39,39 @@ const Header = () => {
   );
 };
 
+const ScrollToTopButton = () => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const toggleVisibility = () => {
+      if (window.scrollY > 300) {
+        setIsVisible(true);
+      } else {
+        setIsVisible(false);
+      }
+    };
+
+    window.addEventListener('scroll', toggleVisibility);
+    return () => window.removeEventListener('scroll', toggleVisibility);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  if (!isVisible) return null;
+
+  return (
+    <button 
+      className="scroll-to-top" 
+      onClick={scrollToTop}
+      aria-label="Scroll to top"
+    >
+      <ArrowUp size={20} />
+    </button>
+  );
+};
+
 const Layout = ({ children }) => {
   return (
     <div className="layout">
@@ -48,9 +81,10 @@ const Layout = ({ children }) => {
       </main>
       <footer className="footer">
         <div className="container">
-          <p>&copy; {new Date().getFullYear()} DevNews. A Modern Blog App by Antigravity.</p>
+          <p>&copy; {new Date().getFullYear()} DevBlog. A Modern Blog App by Antigravity.</p>
         </div>
       </footer>
+      <ScrollToTopButton />
     </div>
   );
 };

@@ -21,12 +21,19 @@ export const getAdminBlogs = async () => {
         "X-Master-Key": apiKey
       }
     });
-    if (!res.ok) throw new Error("Failed to fetch admin blogs");
+    if (!res.ok) {
+      // If bin doesn't exist or is empty, initialize it
+      if (res.status === 404 || res.status === 400) {
+        await saveAdminBlogs([]);
+        return [];
+      }
+      throw new Error("Failed to fetch admin blogs");
+    }
     const data = await res.json();
-    return data.record.articles || [];
+    return data.record?.articles || [];
   } catch (err) {
     console.error("JSONBin GET Error:", err);
-    throw err;
+    return [];
   }
 };
 
@@ -40,18 +47,56 @@ export const saveAdminBlogs = async (blogs) => {
   }
 
   try {
+    // First check if bin exists
+    const getRes = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+      headers: {
+        "X-Master-Key": apiKey
+      }
+    });
+
+    if (!getRes.ok) {
+      // Bin doesn't exist, create it
+      const createRes = await fetch(`https://api.jsonbin.io/v3/b`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Master-Key": apiKey
+        },
+        body: JSON.stringify({ articles: blogs })
+      });
+      
+      if (!createRes.ok) {
+        const errorText = await createRes.text();
+        console.error("JSONBin CREATE Error:", createRes.status, errorText);
+        throw new Error(`Failed to create bin: ${createRes.status}`);
+      }
+      console.log("Created new JSONBin");
+      return;
+    }
+
+    // Bin exists, update it
+    let etag = getRes.headers.get("etag");
+    
     const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        "X-Master-Key": apiKey
+        "X-Master-Key": apiKey,
+        ...(etag ? { "If-Match": etag } : {})
       },
       body: JSON.stringify({ articles: blogs })
     });
-    if (!res.ok) throw new Error("Failed to save admin blogs");
+    
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("JSONBin PUT Error:", res.status, errorText);
+      throw new Error(`Failed to save: ${res.status}`);
+    }
+    console.log("Saved to JSONBin successfully");
   } catch (err) {
-    console.error("JSONBin PUT Error:", err);
-    throw err;
+    console.error("JSONBin Error:", err);
+    // Fallback to localStorage on error
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(blogs));
   }
 };
 

@@ -237,13 +237,13 @@ const ArticleList = () => {
               {article.image && (
                 <div className="card-image-wrapper">
                   <img src={article.image} alt={article.title} className="card-image" loading="lazy" />
-                  <span className="source-tag">{article.source === 'admin' ? 'Dev Blog' : 'News'}</span>
+                  <span className="source-tag">{article.source === 'admin' ? 'Dev Blog' : article.source}</span>
                 </div>
               )}
               
               <div className="card-content">
                 {!article.image && (
-                  <span className="source-tag inside">{article.source === 'admin' ? 'Dev Blog' : 'News'}</span>
+                  <span className="source-tag inside">{article.source === 'admin' ? 'Dev Blog' : article.source}</span>
                 )}
                 <h3 className="card-title">{article.title}</h3>
                 <p className="card-excerpt">

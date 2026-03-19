@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { getAdminBlogs, createBlog, updateBlog, deleteBlog } from '../api/myBlogApi';
-import { getNews, getCategories } from '../api/newsApi';
+import { getAggregatedNews, getAggregatedCategories } from '../api/newsAggregator';
 
 const BlogContext = createContext();
 
@@ -14,7 +14,7 @@ export const BlogProvider = ({ children }) => {
   // Public News API State
   const [publicCategories, setPublicCategories] = useState(['all']);
   const [publicTotal, setPublicTotal] = useState(0);
-  const [publicLimit, setPublicLimit] = useState(9);
+  const [publicLimit, setPublicLimit] = useState(15);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -31,10 +31,8 @@ export const BlogProvider = ({ children }) => {
   const fetchInitData = async () => {
     setLoading(true);
     try {
-      const [adminData, cats] = await Promise.all([
-        getAdminBlogs(),
-        getCategories()
-      ]);
+      const adminData = await getAdminBlogs();
+      const cats = getAggregatedCategories();
       setBlogs(adminData || []);
       setPublicCategories(cats || ['all']);
     } catch (err) {
@@ -48,10 +46,10 @@ export const BlogProvider = ({ children }) => {
   const loadPublicNews = async (page = 1, search = '', category = 'all') => {
     setLoading(true);
     try {
-      const { articles, total, limit } = await getNews(page, search, category);
+      const articles = await getAggregatedNews(page, category, 15);
       setNews(articles);
-      setPublicTotal(total);
-      setPublicLimit(limit);
+      setPublicTotal(articles.length);
+      setPublicLimit(15);
     } catch (err) {
       setError("Failed to fetch public blogs.");
     } finally {
